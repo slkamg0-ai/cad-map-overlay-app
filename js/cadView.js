@@ -321,13 +321,17 @@ export class CadView {
     ctx.fillStyle = 'rgba(148, 163, 184, 0.4)';
     ctx.font = '10px monospace';
 
+    let lastLabelX = -100;
     for (let x = startX; x <= endX; x += step) {
       const sp = this.toScreen(x, 0);
       ctx.beginPath();
       ctx.moveTo(sp.x, 0);
       ctx.lineTo(sp.x, this.height);
       ctx.stroke();
-      ctx.fillText(x.toFixed(0), sp.x + 4, this.height - 8);
+      if (sp.x - lastLabelX >= 68) {
+        ctx.fillText(x.toFixed(0), sp.x + 4, this.height - 68);
+        lastLabelX = sp.x;
+      }
     }
 
     for (let y = startY; y <= endY; y += step) {
@@ -336,7 +340,9 @@ export class CadView {
       ctx.moveTo(0, sp.y);
       ctx.lineTo(this.width, sp.y);
       ctx.stroke();
-      ctx.fillText(y.toFixed(0), 6, sp.y - 4);
+      if (sp.y > 70 && sp.y < this.height - 80) {
+        ctx.fillText(y.toFixed(0), 6, sp.y - 4);
+      }
     }
   }
 

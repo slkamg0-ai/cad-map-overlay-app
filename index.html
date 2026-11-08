@@ -33,21 +33,22 @@
   <!-- ===================================================================== -->
   <!-- 1. Top Navigation & Mode Control Header                               -->
   <!-- ===================================================================== -->
-  <header class="h-14 shrink-0 glass-panel border-b border-slate-800 px-3 sm:px-4 flex items-center justify-between gap-2 z-[1000]">
+  <header class="h-13 shrink-0 glass-panel border-b border-slate-800 px-2.5 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-2 z-[1000]">
     
     <!-- Left: Brand & File Upload Actions -->
-    <div class="flex items-center gap-2 min-w-0">
-      <div class="flex items-center gap-1.5 pr-1">
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div class="hidden sm:flex items-center gap-1.5 pr-1">
         <span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_#3b82f6]"></span>
         <span class="font-extrabold text-sm sm:text-base tracking-tight text-white whitespace-nowrap">CAD<span class="text-blue-400">↔</span>Map</span>
       </div>
 
-      <button id="btn-upload-cad" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow flex items-center gap-1.5 transition shrink-0">
+      <button id="btn-upload-cad" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg shadow flex items-center gap-1 transition whitespace-nowrap shrink-0">
         <span>📁</span>
-        <span>캐드 업로드 (.dxf/.dwg)</span>
+        <span class="sm:hidden">업로드</span>
+        <span class="hidden sm:inline">캐드 업로드 (.dxf/.dwg)</span>
       </button>
 
-      <button id="btn-load-sample" class="hidden lg:flex bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-700 items-center gap-1 transition shrink-0" title="샘플 설비 도면 다시 불러오기">
+      <button id="btn-load-sample" class="hidden lg:flex bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-700 items-center gap-1 transition whitespace-nowrap shrink-0" title="샘플 설비 도면 다시 불러오기">
         <span>🏛️</span>
         <span>샘플 도면</span>
       </button>
@@ -61,23 +62,24 @@
 
     <!-- Center: 3-Way View Mode Switcher (지도 오버레이 | 순수 도면보기 | 동시 분할비교) -->
     <div class="flex items-center bg-slate-900/95 p-1 rounded-xl border border-slate-700/80 shadow-inner shrink-0">
-      <button id="tab-view-map" class="active-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 transition flex items-center gap-1.5">
+      <button id="tab-view-map" class="active-mode-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 transition flex items-center gap-1 whitespace-nowrap">
         <span>🛰️</span>
-        <span>지도 + 캐드 오버레이</span>
+        <span class="sm:hidden">지도 오버레이</span>
+        <span class="hidden sm:inline">지도 + 캐드 오버레이</span>
       </button>
-      <button id="tab-view-cad" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1.5">
+      <button id="tab-view-cad" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-1 whitespace-nowrap">
         <span>📐</span>
         <span>도면만 보기</span>
       </button>
-      <button id="tab-view-split" class="hidden sm:flex px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition items-center gap-1.5">
+      <button id="tab-view-split" class="hidden md:flex px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition items-center gap-1.5 whitespace-nowrap">
         <span>🌓</span>
         <span>지도·도면 동시비교</span>
       </button>
     </div>
 
     <!-- Right: Components & Settings Side Panel Toggle -->
-    <div class="flex items-center gap-2 shrink-0">
-      <button id="btn-toggle-panel" class="bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+    <div class="flex items-center gap-1.5 shrink-0">
+      <button id="btn-toggle-panel" class="bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition whitespace-nowrap">
         <span>📋</span>
         <span class="hidden sm:inline">설치객체 목록 / 설정</span>
       </button>
@@ -94,48 +96,50 @@
     <div id="map-container-wrap" class="relative flex-1 h-full w-full">
       <div id="map-viewport" class="w-full h-full"></div>
 
-      <!-- Map Top-Left Guide Badge -->
-      <div class="absolute top-3 left-3 z-[800] pointer-events-none flex flex-col gap-1.5">
+      <!-- Map Top-Left Guide Badge (Desktop Only to prevent mobile overlap) -->
+      <div class="hidden lg:flex absolute top-3 left-3 z-[800] pointer-events-none flex-col gap-1.5">
         <div class="glass-panel px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-lg text-xs flex items-center gap-2">
           <span class="text-blue-400 font-bold">🛰️ 지도 오버레이 화면</span>
-          <span class="text-slate-400 hidden sm:inline">| 지도 위 캐드 객체나 위치를 클릭한 뒤 <strong class="text-emerald-300">[이 위치 도면보기]</strong>를 누르세요</span>
+          <span class="text-slate-400">| 지도 위 캐드 객체나 위치를 클릭한 뒤 <strong class="text-emerald-300">[이 위치 도면보기]</strong>를 누르세요</span>
         </div>
       </div>
 
       <!-- Map Floating Quick Controls (Top-Right inside Map) -->
-      <div class="absolute top-3 right-3 z-[800] flex flex-wrap items-center justify-end gap-2">
-        <button id="btn-my-location" class="glass-panel hover:bg-blue-600/80 text-sky-300 hover:text-white text-xs font-bold px-3 py-2 rounded-xl border border-sky-500/50 shadow-lg flex items-center gap-1.5 transition" title="현재 내 GPS 위치 확인 및 이동">
+      <div class="absolute top-2.5 inset-x-2.5 lg:left-auto lg:right-3 z-[800] flex flex-wrap items-center justify-end gap-1.5">
+        <button id="btn-my-location" class="glass-panel hover:bg-blue-600/80 text-sky-300 hover:text-white text-xs font-bold px-2.5 py-1.5 rounded-xl border border-sky-500/50 shadow-lg flex items-center gap-1 transition whitespace-nowrap" title="현재 내 GPS 위치 확인 및 이동">
           <span>📍</span>
           <span id="label-my-location">내 위치 확인</span>
         </button>
-        <button id="btn-sim-location" class="glass-panel hover:bg-slate-800 text-slate-300 text-xs font-semibold px-2.5 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1 transition" title="현장 밖/PC에서 지도를 클릭해 내 위치를 가상으로 지정">
+        <button id="btn-sim-location" class="glass-panel hover:bg-slate-800 text-slate-300 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1 transition whitespace-nowrap" title="현장 밖/PC에서 지도를 클릭해 내 위치를 가상으로 지정">
           <span>🎮</span>
           <span class="hidden sm:inline">모의 내위치</span>
         </button>
-        <button id="btn-open-coord-search" class="glass-panel hover:bg-slate-800 text-amber-300 text-xs font-bold px-3 py-2 rounded-xl border border-amber-500/40 shadow-lg flex items-center gap-1.5 transition">
+        <button id="btn-open-coord-search" class="glass-panel hover:bg-slate-800 text-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-amber-500/40 shadow-lg flex items-center gap-1 transition whitespace-nowrap">
           <span>🎯</span>
-          <span>좌표로 위치 찾기</span>
+          <span>좌표 찾기</span>
         </button>
-        <button id="btn-map-fit" class="glass-panel hover:bg-slate-800 text-slate-100 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 transition">
+        <button id="btn-map-fit" class="glass-panel hover:bg-slate-800 text-slate-100 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1 transition whitespace-nowrap">
           <span>🗺️</span>
-          <span>도면 위치로 지도 이동</span>
+          <span>전체 도면</span>
         </button>
       </div>
 
-      <!-- Map Bottom-Left Live Coordinate HUD (Real-time Cursor & Center Coordinates) -->
-      <div class="absolute bottom-3 left-3 z-[800] flex flex-wrap items-center gap-1.5 pointer-events-auto">
-        <div class="glass-panel px-3 py-1.5 rounded-xl border border-slate-700/90 shadow-xl flex items-center gap-3 text-xs">
-          <div class="flex items-center gap-1.5">
-            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">CAD 좌표</span>
-            <span id="map-live-cad" class="font-mono font-bold text-slate-100">X: 198070.00, Y: 551875.00</span>
+      <!-- Map Bottom-Left Live Coordinate HUD (Clean 2-row or aligned layout, no vertical text wrapping) -->
+      <div class="absolute bottom-3 inset-x-2.5 sm:right-auto sm:left-3 z-[800] pointer-events-auto">
+        <div class="glass-panel px-3 py-2 rounded-2xl border border-slate-700/90 shadow-2xl flex items-center justify-between gap-2.5 text-xs">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold text-[10px] whitespace-nowrap shrink-0">CAD 좌표</span>
+              <span id="map-live-cad" class="font-mono font-bold text-slate-100 text-[11px] sm:text-xs whitespace-nowrap truncate">X: 198070.00, Y: 551875.00</span>
+            </div>
+            <span class="hidden sm:inline text-slate-600">|</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] whitespace-nowrap shrink-0">위경도</span>
+              <span id="map-live-geo" class="font-mono font-bold text-slate-100 text-[11px] sm:text-xs whitespace-nowrap truncate">37.566500, 126.978000</span>
+            </div>
           </div>
-          <span class="text-slate-600">|</span>
-          <div class="flex items-center gap-1.5">
-            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">위경도</span>
-            <span id="map-live-geo" class="font-mono font-bold text-slate-100">37.566500, 126.978000</span>
-          </div>
-          <button id="btn-copy-map-coord" class="ml-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 text-[10px] font-semibold transition" title="현재 좌표 복사">
-            복사
+          <button id="btn-copy-map-coord" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-600 text-[11px] font-bold transition whitespace-nowrap shrink-0" title="현재 좌표 복사">
+            📋 복사
           </button>
         </div>
       </div>
@@ -155,58 +159,61 @@
         <div id="cad-crosshair-tag" class="cad-crosshair-tag hidden">🎯 스냅됨</div>
       </div>
 
-      <!-- CAD Top-Left Guide Badge -->
-      <div class="absolute top-3 left-3 z-[800] pointer-events-none flex flex-col gap-1.5">
+      <!-- CAD Top-Left Guide Badge (Desktop Only to prevent mobile overlap) -->
+      <div class="hidden lg:flex absolute top-3 left-3 z-[800] pointer-events-none flex-col gap-1.5">
         <div class="glass-panel px-3 py-1.5 rounded-xl border border-emerald-500/40 shadow-lg text-xs flex items-center gap-2">
           <span class="text-emerald-400 font-bold">📐 순수 도면 전용 화면</span>
-          <span class="text-slate-300 hidden sm:inline">| 도면을 움직여 <strong>중앙 십자선(+)</strong>에 맞춘 뒤 <strong class="text-blue-300">[중앙 위치 지도 띄우기]</strong>를 누르세요</span>
+          <span class="text-slate-300">| 도면을 움직여 <strong>중앙 십자선(+)</strong>에 맞춘 뒤 <strong class="text-blue-300">[중앙 위치 지도 띄우기]</strong>를 누르세요</span>
         </div>
       </div>
 
       <!-- CAD Floating Quick Controls (Top-Right inside CAD) -->
-      <div class="absolute top-3 right-3 z-[800] flex flex-wrap items-center justify-end gap-2">
-        <button id="btn-cad-center-to-map" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-400/50 shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition" title="현재 중앙 십자선이 가리키는 도면 위치를 지도에 오버레이하여 설치 위치 확인">
+      <div class="absolute top-2.5 inset-x-2.5 lg:left-auto lg:right-3 z-[800] flex flex-wrap items-center justify-end gap-1.5">
+        <button id="btn-cad-center-to-map" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-2.5 py-1.5 rounded-xl border border-blue-400/50 shadow-lg shadow-blue-600/30 flex items-center gap-1 transition whitespace-nowrap" title="현재 중앙 십자선이 가리키는 도면 위치를 지도에 오버레이하여 설치 위치 확인">
           <span>🛰️</span>
           <span>중앙 십자선 위치 지도 띄우기</span>
         </button>
-        <button id="btn-cad-lock-center" class="glass-panel hover:bg-slate-800 text-emerald-300 text-xs font-bold px-3 py-2 rounded-xl border border-emerald-500/40 shadow-lg flex items-center gap-1.5 transition" title="현재 화면 중앙 십자선 위치를 선택 객체로 고정">
+        <button id="btn-cad-lock-center" class="glass-panel hover:bg-slate-800 text-emerald-300 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-emerald-500/40 shadow-lg flex items-center gap-1 transition whitespace-nowrap" title="현재 화면 중앙 십자선 위치를 선택 객체로 고정">
           <span>📌</span>
-          <span>십자선 지점 선택</span>
+          <span>십자선 선택</span>
         </button>
-        <button id="btn-open-coord-search-cad" class="glass-panel hover:bg-slate-800 text-amber-300 text-xs font-bold px-3 py-2 rounded-xl border border-amber-500/40 shadow-lg flex items-center gap-1.5 transition">
+        <button id="btn-open-coord-search-cad" class="glass-panel hover:bg-slate-800 text-amber-300 text-xs font-bold px-2.5 py-1.5 rounded-xl border border-amber-500/40 shadow-lg flex items-center gap-1 transition whitespace-nowrap">
           <span>🎯</span>
-          <span>좌표 입력 찾기</span>
+          <span>좌표 찾기</span>
         </button>
-        <button id="btn-cad-measure" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 transition">
+        <button id="btn-cad-measure" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1 transition whitespace-nowrap">
           <span>📏</span>
           <span>치수 측정</span>
         </button>
-        <button id="btn-cad-fit" class="glass-panel hover:bg-slate-800 text-slate-100 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 transition">
+        <button id="btn-cad-fit" class="glass-panel hover:bg-slate-800 text-slate-100 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1 transition whitespace-nowrap">
           <span>🔍</span>
           <span>전체 맞춤</span>
         </button>
       </div>
 
-      <!-- CAD Bottom-Left Live Coordinate & Vertex Snap Readout (Always shows Center Crosshair Coordinates) -->
-      <div class="absolute bottom-3 left-3 z-[800] flex flex-wrap items-center gap-2 pointer-events-auto">
-        <div class="glass-panel px-3 py-1.5 rounded-xl border border-cyan-500/40 text-xs shadow-xl flex items-center gap-3">
-          <div class="flex items-center gap-1.5">
-            <span id="cad-coord-source-badge" class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]">화면 중앙 십자선</span>
-            <span id="cad-live-coords" class="font-mono font-bold text-slate-100">X: 0.00, Y: 0.00</span>
-          </div>
-          <span class="text-slate-600">|</span>
-          <div class="flex items-center gap-1.5">
-            <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">환산 위경도</span>
-            <span id="cad-live-geo" class="font-mono font-bold text-slate-100">-</span>
-          </div>
-          <button id="btn-copy-cad-coord" class="ml-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 text-[10px] font-semibold transition">
-            복사
-          </button>
-        </div>
-        <button id="btn-cad-add-measure-pt" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-lg flex items-center gap-1">
+      <!-- CAD Bottom Live Coordinate & Vertex Snap Readout (Cleanly aligned 2-row on mobile, 1-row on desktop) -->
+      <div class="absolute bottom-3 inset-x-2.5 sm:right-auto sm:left-3 z-[800] flex flex-col gap-1.5 pointer-events-auto">
+        <button id="btn-cad-add-measure-pt" class="hidden self-start bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-lg flex items-center gap-1.5 whitespace-nowrap">
           <span>➕</span>
           <span>십자선 위치 측정점 찍기</span>
         </button>
+
+        <div class="glass-panel px-3 py-2 rounded-2xl border border-cyan-500/40 text-xs shadow-2xl flex items-center justify-between gap-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0 flex-1">
+            <div class="flex items-center gap-2 min-w-0">
+              <span id="cad-coord-source-badge" class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0">십자선 CAD</span>
+              <span id="cad-live-coords" class="font-mono font-bold text-slate-100 text-[11px] sm:text-xs whitespace-nowrap truncate">X: 0.00, Y: 0.00</span>
+            </div>
+            <span class="hidden sm:inline text-slate-600">|</span>
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold text-[10px] whitespace-nowrap shrink-0">환산 위경도</span>
+              <span id="cad-live-geo" class="font-mono font-bold text-slate-100 text-[11px] sm:text-xs whitespace-nowrap truncate">-</span>
+            </div>
+          </div>
+          <button id="btn-copy-cad-coord" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-600 text-[11px] font-bold transition whitespace-nowrap shrink-0">
+            📋 복사
+          </button>
+        </div>
       </div>
     </div>
 

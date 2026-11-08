@@ -508,11 +508,11 @@ class CadMapOverlayApp {
     }
     if (srcBadge) {
       if (snapTitle) {
-        srcBadge.textContent = `🎯 십자선 스냅`;
-        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold text-[10px]';
+        srcBadge.textContent = `🎯 스냅됨`;
+        srcBadge.className = 'px-2 py-0.5 rounded-md bg-cyan-500 text-slate-950 font-extrabold text-[10px] whitespace-nowrap shrink-0';
       } else {
-        srcBadge.textContent = `화면 중앙 십자선`;
-        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]';
+        srcBadge.textContent = `십자선 CAD`;
+        srcBadge.className = 'px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0';
       }
     }
   }
