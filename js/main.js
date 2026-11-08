@@ -29,10 +29,8 @@ class CadMapOverlayApp {
     this.bindUiEvents();
     this.initPwaInstall();
 
-    // Load rich sample CAD drawing on startup
-    setTimeout(() => {
-      this.loadSampleDrawing();
-    }, 250);
+    // Load sample CAD drawing immediately without delayed double tile fetch
+    this.loadSampleDrawing();
   }
 
   initViews() {

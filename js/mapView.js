@@ -35,9 +35,10 @@ export class MapView {
 
   initMap() {
     this.map = L.map(this.containerId, {
-      center: [37.5665, 126.9780],
-      zoom: 18,
+      center: [37.5663, 126.9779],
+      zoom: 19,
       maxZoom: 22,
+      preferCanvas: true,
       zoomControl: false,
       attributionControl: false
     });
@@ -46,12 +47,12 @@ export class MapView {
 
     this.tileLayers['vworld_sat'] = L.tileLayer(
       'https://xdworld.vworld.kr/2d/Satellite/service/{z}/{x}/{y}.jpeg',
-      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19 }
+      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19, updateWhenIdle: false, keepBuffer: 2 }
     );
 
     this.hybridLayer = L.tileLayer(
       'https://xdworld.vworld.kr/2d/Hybrid/service/{z}/{x}/{y}.png',
-      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19, zIndex: 10 }
+      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19, zIndex: 10, updateWhenIdle: true, keepBuffer: 1 }
     );
 
     this.tileLayers['vworld_base'] = L.tileLayer(
