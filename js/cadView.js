@@ -102,16 +102,19 @@ export class CadView {
       this.resize();
     }
 
+    const viewW = this.width || window.innerWidth || 360;
+    const viewH = this.height || (window.innerHeight - 130) || 560;
+
     const b = this.cadData.bounds;
     this.originX = (b.minX + b.maxX) / 2;
     this.originY = (b.minY + b.maxY) / 2;
 
     const dx = Math.max(b.maxX - b.minX, 10);
     const dy = Math.max(b.maxY - b.minY, 10);
-    const pad = 80;
+    const pad = Math.min(Math.min(viewW, viewH) * 0.12, 56);
 
-    const scaleX = Math.max(this.width - pad * 2, 100) / dx;
-    const scaleY = Math.max(this.height - pad * 2, 100) / dy;
+    const scaleX = Math.max(viewW - pad * 2, 120) / dx;
+    const scaleY = Math.max(viewH - pad * 2, 120) / dy;
     this.scale = Math.max(Math.min(scaleX, scaleY), 0.001);
     this.render();
   }
@@ -329,7 +332,7 @@ export class CadView {
       ctx.lineTo(sp.x, this.height);
       ctx.stroke();
       if (sp.x - lastLabelX >= 68) {
-        ctx.fillText(x.toFixed(0), sp.x + 4, this.height - 68);
+        ctx.fillText(x.toFixed(0), sp.x + 4, this.height - 8);
         lastLabelX = sp.x;
       }
     }
@@ -340,7 +343,7 @@ export class CadView {
       ctx.moveTo(0, sp.y);
       ctx.lineTo(this.width, sp.y);
       ctx.stroke();
-      if (sp.y > 70 && sp.y < this.height - 80) {
+      if (sp.y > 18 && sp.y < this.height - 20) {
         ctx.fillText(y.toFixed(0), 6, sp.y - 4);
       }
     }
@@ -447,8 +450,10 @@ export class CadView {
         case 'TEXT':
         case 'MTEXT': {
           if (!ent.text) break;
+          const rawFontPx = (ent.height || 1.8) * this.scale;
+          if (rawFontPx < 3.5 && !isSelected) break;
           const p = this.toScreen(ent.x, ent.y);
-          const fontPx = Math.max(Math.min((ent.height || 1.8) * this.scale, 22), 10);
+          const fontPx = Math.max(Math.min(rawFontPx, 20), 9.5);
           ctx.font = `600 ${fontPx}px "Pretendard", system-ui, sans-serif`;
           const clean = ent.text.replace(/\\P/g, ' ').replace(/\\[A-Za-z0-9]+;/g, '');
           ctx.fillStyle = '#0b1120';

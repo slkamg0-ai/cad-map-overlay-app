@@ -263,16 +263,39 @@ class CadMapOverlayApp {
     document.getElementById('btn-go-geo-on-map')?.addEventListener('click', () => this.goToSearchedGeoCoord('map'));
     document.getElementById('btn-go-geo-on-drawing')?.addEventListener('click', () => this.goToSearchedGeoCoord('cad'));
 
-    document.getElementById('btn-copy-map-coord')?.addEventListener('click', () => {
-      const cadTxt = document.getElementById('map-live-cad')?.textContent || '';
-      const geoTxt = document.getElementById('map-live-geo')?.textContent || '';
-      this.copyTextToClipboard(`CAD(${cadTxt}) / GPS(${geoTxt})`);
-    });
-
     document.getElementById('btn-copy-cad-coord')?.addEventListener('click', () => {
       const cadTxt = document.getElementById('cad-live-coords')?.textContent || '';
       const geoTxt = document.getElementById('cad-live-geo')?.textContent || '';
       this.copyTextToClipboard(`CAD(${cadTxt}) / GPS(${geoTxt})`);
+    });
+
+    // Bottom Coordinate Bar Quick Handoff Button (Map <-> CAD 1-Tap Switch)
+    document.getElementById('btn-bottom-quick-handoff')?.addEventListener('click', () => {
+      if (this.viewMode === 'cad') {
+        const sel = this.cadView.getCenterSelection();
+        this.handleSelection(sel);
+        this.setViewMode('map', false);
+        this.mapView.focusSelection(this.currentSelection, true);
+        this.showToast(`🛰️ 십자선 위치 지도 띄우기: [${this.currentSelection.title}] 설치 위치를 표시합니다.`);
+      } else {
+        if (!this.currentSelection) {
+          const c = this.mapView.map.getCenter();
+          this.handleSelection({
+            source: 'map',
+            lat: c.lat,
+            lng: c.lng,
+            cadX: null,
+            cadY: null,
+            entity: null,
+            title: '지도 중심 위치',
+            layerName: '지도 중심',
+            typeLabel: '좌표점'
+          });
+        }
+        this.setViewMode('cad', false);
+        this.cadView.focusSelection(this.currentSelection, true);
+        this.showToast(`📐 순수 도면 보기 전환: [${this.currentSelection.title}] 위치를 확대했습니다.`);
+      }
     });
 
     // 10. My Location (Real GPS + Simulated Click Mode)
@@ -306,22 +329,48 @@ class CadMapOverlayApp {
     const tabCad = document.getElementById('tab-view-cad');
     const tabSplit = document.getElementById('tab-view-split');
 
+    const toolbarMap = document.getElementById('toolbar-map-controls');
+    const toolbarCad = document.getElementById('toolbar-cad-controls');
+    const handoffBtn = document.getElementById('btn-bottom-quick-handoff');
+    const handoffIcon = document.getElementById('bottom-handoff-icon');
+    const handoffLabel = document.getElementById('bottom-handoff-label');
+
     [tabMap, tabCad, tabSplit].forEach((t) => t.classList.remove('active-mode-btn'));
 
     if (mode === 'map') {
       tabMap.classList.add('active-mode-btn');
-      mapWrap.className = 'relative flex-1 h-full w-full';
+      mapWrap.className = 'relative flex-1 h-full w-full min-h-0';
       cadWrap.className = 'hidden';
+
+      if (toolbarMap) toolbarMap.className = 'flex items-center gap-1 shrink-0';
+      if (toolbarCad) toolbarCad.className = 'hidden items-center gap-1 shrink-0';
+      if (handoffBtn) {
+        handoffBtn.className = 'px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold shadow transition whitespace-nowrap flex items-center gap-1';
+      }
+      if (handoffIcon) handoffIcon.textContent = '📐';
+      if (handoffLabel) handoffLabel.textContent = '이 위치 도면보기';
+
       setTimeout(() => {
         this.mapView.invalidateSize();
         if (focusExisting && this.currentSelection) {
           this.mapView.focusSelection(this.currentSelection, true);
         }
+        const c = this.mapView.map.getCenter();
+        this.updateLiveMapHud(c.lat, c.lng);
       }, 60);
     } else if (mode === 'cad') {
       tabCad.classList.add('active-mode-btn');
       mapWrap.className = 'hidden';
-      cadWrap.className = 'relative flex-1 h-full w-full';
+      cadWrap.className = 'relative flex-1 h-full w-full min-h-0';
+
+      if (toolbarMap) toolbarMap.className = 'hidden items-center gap-1 shrink-0';
+      if (toolbarCad) toolbarCad.className = 'flex items-center gap-1 shrink-0';
+      if (handoffBtn) {
+        handoffBtn.className = 'px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold shadow transition whitespace-nowrap flex items-center gap-1';
+      }
+      if (handoffIcon) handoffIcon.textContent = '🛰️';
+      if (handoffLabel) handoffLabel.textContent = '십자선 지도띄우기';
+
       setTimeout(() => {
         this.cadView.resize();
         if (focusExisting && this.currentSelection) {
@@ -332,8 +381,12 @@ class CadMapOverlayApp {
       }, 60);
     } else if (mode === 'split') {
       tabSplit.classList.add('active-mode-btn');
-      mapWrap.className = 'relative w-full md:w-1/2 h-1/2 md:h-full border-b md:border-b-0 md:border-r border-slate-700/80';
-      cadWrap.className = 'relative w-full md:w-1/2 h-1/2 md:h-full';
+      mapWrap.className = 'relative w-full md:w-1/2 h-1/2 md:h-full border-b md:border-b-0 md:border-r border-slate-700/80 min-h-0';
+      cadWrap.className = 'relative w-full md:w-1/2 h-1/2 md:h-full min-h-0';
+
+      if (toolbarMap) toolbarMap.className = 'flex items-center gap-1 shrink-0';
+      if (toolbarCad) toolbarCad.className = 'flex items-center gap-1 shrink-0';
+
       setTimeout(() => {
         this.mapView.invalidateSize();
         this.cadView.resize();
@@ -476,22 +529,30 @@ class CadMapOverlayApp {
   }
 
   updateLiveMapHud(lat, lng) {
-    const geoEl = document.getElementById('map-live-geo');
-    const cadEl = document.getElementById('map-live-cad');
+    if (this.viewMode === 'cad') return;
+
+    const coordEl = document.getElementById('cad-live-coords');
+    const geoEl = document.getElementById('cad-live-geo');
+    const srcBadge = document.getElementById('cad-coord-source-badge');
+
+    const cadPt = this.transformer.latLngToCad(lat, lng);
+    if (coordEl) {
+      coordEl.textContent = cadPt
+        ? `X: ${cadPt[0].toFixed(2)}, Y: ${cadPt[1].toFixed(2)}`
+        : '좌표계 미매칭';
+    }
     if (geoEl) {
       geoEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     }
-    if (cadEl) {
-      const cadPt = this.transformer.latLngToCad(lat, lng);
-      if (cadPt) {
-        cadEl.textContent = `X: ${cadPt[0].toFixed(2)}, Y: ${cadPt[1].toFixed(2)}`;
-      } else {
-        cadEl.textContent = '좌표계 미매칭';
-      }
+    if (srcBadge) {
+      srcBadge.textContent = '지도 좌표';
+      srcBadge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px] whitespace-nowrap shrink-0';
     }
   }
 
   updateLiveCadHud(x, y, snapTitle) {
+    if (this.viewMode === 'map') return;
+
     const coordEl = document.getElementById('cad-live-coords');
     const geoEl = document.getElementById('cad-live-geo');
     const srcBadge = document.getElementById('cad-coord-source-badge');
@@ -508,11 +569,11 @@ class CadMapOverlayApp {
     }
     if (srcBadge) {
       if (snapTitle) {
-        srcBadge.textContent = `🎯 스냅됨`;
-        srcBadge.className = 'px-2 py-0.5 rounded-md bg-cyan-500 text-slate-950 font-extrabold text-[10px] whitespace-nowrap shrink-0';
+        srcBadge.textContent = '🎯 스냅됨';
+        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold text-[10px] whitespace-nowrap shrink-0';
       } else {
-        srcBadge.textContent = `십자선 CAD`;
-        srcBadge.className = 'px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0';
+        srcBadge.textContent = '십자선 CAD';
+        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0';
       }
     }
   }
