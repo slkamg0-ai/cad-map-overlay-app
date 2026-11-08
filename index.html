@@ -145,35 +145,53 @@
     <div id="cad-container-wrap" class="hidden">
       <div id="cad-viewport" class="w-full h-full"></div>
 
+      <!-- Fixed Center Crosshair (Move drawing under crosshair to inspect coordinates) -->
+      <div id="cad-center-crosshair" class="cad-center-crosshair">
+        <svg viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="13" />
+          <circle cx="32" cy="32" r="2" fill="currentColor" />
+          <path d="M32 4v14M32 46v14M4 32h14M46 32h14"/>
+        </svg>
+        <div id="cad-crosshair-tag" class="cad-crosshair-tag hidden">🎯 스냅됨</div>
+      </div>
+
       <!-- CAD Top-Left Guide Badge -->
       <div class="absolute top-3 left-3 z-[800] pointer-events-none flex flex-col gap-1.5">
         <div class="glass-panel px-3 py-1.5 rounded-xl border border-emerald-500/40 shadow-lg text-xs flex items-center gap-2">
           <span class="text-emerald-400 font-bold">📐 순수 도면 전용 화면</span>
-          <span class="text-slate-300 hidden sm:inline">| 도면에서 특정 객체/위치를 클릭한 뒤 <strong class="text-blue-300">[이 위치 지도 띄우기]</strong>를 누르세요</span>
+          <span class="text-slate-300 hidden sm:inline">| 도면을 움직여 <strong>중앙 십자선(+)</strong>에 맞춘 뒤 <strong class="text-blue-300">[중앙 위치 지도 띄우기]</strong>를 누르세요</span>
         </div>
       </div>
 
       <!-- CAD Floating Quick Controls (Top-Right inside CAD) -->
-      <div class="absolute top-3 right-3 z-[800] flex items-center gap-2">
+      <div class="absolute top-3 right-3 z-[800] flex flex-wrap items-center justify-end gap-2">
+        <button id="btn-cad-center-to-map" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold px-3 py-2 rounded-xl border border-blue-400/50 shadow-lg shadow-blue-600/30 flex items-center gap-1.5 transition" title="현재 중앙 십자선이 가리키는 도면 위치를 지도에 오버레이하여 설치 위치 확인">
+          <span>🛰️</span>
+          <span>중앙 십자선 위치 지도 띄우기</span>
+        </button>
+        <button id="btn-cad-lock-center" class="glass-panel hover:bg-slate-800 text-emerald-300 text-xs font-bold px-3 py-2 rounded-xl border border-emerald-500/40 shadow-lg flex items-center gap-1.5 transition" title="현재 화면 중앙 십자선 위치를 선택 객체로 고정">
+          <span>📌</span>
+          <span>십자선 지점 선택</span>
+        </button>
         <button id="btn-open-coord-search-cad" class="glass-panel hover:bg-slate-800 text-amber-300 text-xs font-bold px-3 py-2 rounded-xl border border-amber-500/40 shadow-lg flex items-center gap-1.5 transition">
           <span>🎯</span>
-          <span>좌표로 위치 찾기</span>
+          <span>좌표 입력 찾기</span>
         </button>
         <button id="btn-cad-measure" class="bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 transition">
           <span>📏</span>
-          <span>치수/거리 측정</span>
+          <span>치수 측정</span>
         </button>
         <button id="btn-cad-fit" class="glass-panel hover:bg-slate-800 text-slate-100 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 shadow-lg flex items-center gap-1.5 transition">
           <span>🔍</span>
-          <span>도면 전체 맞춤</span>
+          <span>전체 맞춤</span>
         </button>
       </div>
 
-      <!-- CAD Bottom-Left Live Coordinate & Vertex Snap Readout -->
+      <!-- CAD Bottom-Left Live Coordinate & Vertex Snap Readout (Always shows Center Crosshair Coordinates) -->
       <div class="absolute bottom-3 left-3 z-[800] flex flex-wrap items-center gap-2 pointer-events-auto">
-        <div class="glass-panel px-3 py-1.5 rounded-xl border border-slate-700/90 text-xs shadow-xl flex items-center gap-3">
+        <div class="glass-panel px-3 py-1.5 rounded-xl border border-cyan-500/40 text-xs shadow-xl flex items-center gap-3">
           <div class="flex items-center gap-1.5">
-            <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">CAD 좌표</span>
+            <span id="cad-coord-source-badge" class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]">화면 중앙 십자선</span>
             <span id="cad-live-coords" class="font-mono font-bold text-slate-100">X: 0.00, Y: 0.00</span>
           </div>
           <span class="text-slate-600">|</span>
@@ -185,9 +203,10 @@
             복사
           </button>
         </div>
-        <div id="cad-live-snap" class="hidden glass-panel px-3 py-1.5 rounded-full border border-cyan-500/50 text-xs font-bold text-cyan-300 shadow">
-          🎯 스냅
-        </div>
+        <button id="btn-cad-add-measure-pt" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-3.5 py-1.5 rounded-xl shadow-lg flex items-center gap-1">
+          <span>➕</span>
+          <span>십자선 위치 측정점 찍기</span>
+        </button>
       </div>
     </div>
 

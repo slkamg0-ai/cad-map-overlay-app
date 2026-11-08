@@ -11,7 +11,7 @@ export class CadView {
   constructor(containerId, options = {}) {
     this.container = document.getElementById(containerId);
     this.canvas = document.createElement('canvas');
-    this.canvas.className = 'w-full h-full block cursor-crosshair';
+    this.canvas.className = 'w-full h-full block cursor-grab active:cursor-grabbing';
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
 
@@ -25,9 +25,10 @@ export class CadView {
     this.minScale = 0.0001;
     this.maxScale = 50000;
 
-    // Selection & Hover state
+    // Selection & Center Crosshair Snap state
     this.selectedPoint = null; // { cadX, cadY, entity, title, layerName, typeLabel }
-    this.hoverSnap = null;     // { x, y, label, entity }
+    this.centerSnap = null;    // { x, y, title, layerName, typeLabel, entity }
+    this.hoverSnap = null;     // { x, y, title, entity }
 
     // Measurement tool state
     this.measureMode = false;
@@ -188,13 +189,8 @@ export class CadView {
       this.drawEntities(ctx);
     }
 
-    // 4. Render Hover Snap Indicator
-    if (this.hoverSnap) {
-      const sp = this.toScreen(this.hoverSnap.x, this.hoverSnap.y);
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(sp.x - 5, sp.y - 5, 10, 10);
-    }
+    // 4. Evaluate Fixed Center Crosshair Coordinates & Snap
+    this.updateCenterCrosshairState(ctx);
 
     // 5. Render Measurement Tool Overlay
     if (this.measurePoints.length > 0) {
@@ -207,6 +203,101 @@ export class CadView {
     }
 
     ctx.restore();
+  }
+
+  /**
+   * Always compute the CAD coordinates under the fixed screen-center crosshair (originX, originY)
+   * and snap to any nearby vertex/entity within 18px of the center crosshair.
+   */
+  updateCenterCrosshairState(ctx) {
+    const snapRadiusWorld = 18 / this.scale;
+    const snap = this.findNearestTarget(this.originX, this.originY, snapRadiusWorld);
+    this.centerSnap = snap;
+
+    // Draw cyan snap indicator box & line from center to snapped point
+    if (snap) {
+      const sp = this.toScreen(snap.x, snap.y);
+      const cx = this.width / 2;
+      const cy = this.height / 2;
+
+      ctx.save();
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sp.x - 6, sp.y - 6, 12, 12);
+
+      if (Math.hypot(sp.x - cx, sp.y - cy) > 2) {
+        ctx.beginPath();
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(sp.x, sp.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Update DOM Crosshair visual state & Live Coordinate Readout
+    const crosshairEl = document.getElementById('cad-center-crosshair');
+    const tagEl = document.getElementById('cad-crosshair-tag');
+    if (crosshairEl) {
+      crosshairEl.classList.toggle('is-snapped', !!snap);
+    }
+    if (tagEl) {
+      if (snap) {
+        tagEl.textContent = `🎯 ${snap.title}`;
+        tagEl.classList.remove('hidden');
+      } else {
+        tagEl.classList.add('hidden');
+      }
+    }
+
+    if (this.onHoverCoords) {
+      const targetX = snap ? snap.x : this.originX;
+      const targetY = snap ? snap.y : this.originY;
+      this.onHoverCoords(targetX, targetY, snap ? snap.title : null);
+    }
+  }
+
+  /**
+   * Return the selection object for whatever is currently under the fixed center crosshair
+   */
+  getCenterSelection() {
+    const snap = this.centerSnap || this.findNearestTarget(this.originX, this.originY, 18 / this.scale);
+    const targetX = snap ? snap.x : this.originX;
+    const targetY = snap ? snap.y : this.originY;
+
+    const selection = {
+      source: 'cad',
+      cadX: targetX,
+      cadY: targetY,
+      lat: null,
+      lng: null,
+      entity: snap ? snap.entity : null,
+      title: snap ? snap.title : '중앙 십자선 지정 위치',
+      layerName: snap ? snap.layerName : '도면 중앙 좌표',
+      typeLabel: snap ? snap.typeLabel : '십자선 좌표점'
+    };
+
+    this.selectedPoint = selection;
+    this.startPulseAnimation();
+    this.render();
+    return selection;
+  }
+
+  /**
+   * Add a measurement point at the current center crosshair position
+   */
+  addMeasurePointAtCenter() {
+    const snap = this.centerSnap || this.findNearestTarget(this.originX, this.originY, 18 / this.scale);
+    const pt = {
+      x: snap ? snap.x : this.originX,
+      y: snap ? snap.y : this.originY
+    };
+    if (this.measurePoints.length >= 2) {
+      this.measurePoints = [pt];
+    } else {
+      this.measurePoints.push(pt);
+    }
+    this.render();
   }
 
   drawGrid(ctx) {
@@ -427,7 +518,10 @@ export class CadView {
 
   drawMeasurement(ctx) {
     const p1 = this.measurePoints[0];
-    const p2 = this.measurePoints[1] || (this.hoverSnap ? { x: this.hoverSnap.x, y: this.hoverSnap.y } : p1);
+    const centerPt = this.centerSnap
+      ? { x: this.centerSnap.x, y: this.centerSnap.y }
+      : { x: this.originX, y: this.originY };
+    const p2 = this.measurePoints[1] || centerPt;
 
     const s1 = this.toScreen(p1.x, p1.y);
     const s2 = this.toScreen(p2.x, p2.y);
@@ -553,9 +647,6 @@ export class CadView {
     });
 
     window.addEventListener('mousemove', (e) => {
-      const rect = el.getBoundingClientRect();
-      const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
-
       if (this.isDragging) {
         const dx = e.clientX - this.dragStart.x;
         const dy = e.clientY - this.dragStart.y;
@@ -564,22 +655,6 @@ export class CadView {
 
         this.originX -= dx / this.scale;
         this.originY += dy / this.scale;
-        this.render();
-        return;
-      }
-
-      if (inside) {
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        const world = this.toWorld(sx, sy);
-        const snap = this.findNearestTarget(world.x, world.y, 18 / this.scale);
-        this.hoverSnap = snap;
-
-        if (this.onHoverCoords) {
-          const cx = snap ? snap.x : world.x;
-          const cy = snap ? snap.y : world.y;
-          this.onHoverCoords(cx, cy, snap ? snap.title : null);
-        }
         this.render();
       }
     });
@@ -590,17 +665,9 @@ export class CadView {
 
     el.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      const before = this.toWorld(mx, my);
+      // Zoom centered around the fixed center crosshair (or mouse if shift held)
       const factor = e.deltaY < 0 ? 1.18 : 0.85;
       this.scale = Math.max(Math.min(this.scale * factor, this.maxScale), this.minScale);
-      const after = this.toWorld(mx, my);
-
-      this.originX += before.x - after.x;
-      this.originY += before.y - after.y;
       this.render();
     }, { passive: false });
 
@@ -634,15 +701,7 @@ export class CadView {
         const factor = dist / this.touchPinchDist;
         this.touchPinchDist = dist;
 
-        const rect = el.getBoundingClientRect();
-        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-        const before = this.toWorld(mx, my);
         this.scale = Math.max(Math.min(this.scale * factor, this.maxScale), this.minScale);
-        const after = this.toWorld(mx, my);
-        this.originX += before.x - after.x;
-        this.originY += before.y - after.y;
         this.render();
       }
     }, { passive: true });
@@ -652,7 +711,7 @@ export class CadView {
       this.touchPinchDist = null;
     }, { passive: true });
 
-    // Click to select CAD component / point and allow opening Map Overlay
+    // Clicking/tapping on an entity/point on the canvas smoothly glides that point to the center crosshair and selects it
     el.addEventListener('click', (e) => {
       if (this.dragMoved > 6) return;
 
@@ -664,6 +723,10 @@ export class CadView {
       const nearest = this.findNearestTarget(world.x, world.y, 26 / this.scale);
       const targetX = nearest ? nearest.x : world.x;
       const targetY = nearest ? nearest.y : world.y;
+
+      // Move the drawing so the clicked point aligns directly with the center crosshair
+      this.originX = targetX;
+      this.originY = targetY;
 
       if (this.measureMode) {
         if (this.measurePoints.length >= 2) {
@@ -682,9 +745,9 @@ export class CadView {
         lat: null,
         lng: null,
         entity: nearest ? nearest.entity : null,
-        title: nearest ? nearest.title : '도면 지정 위치',
-        layerName: nearest ? nearest.layerName : '도면 임의 좌표',
-        typeLabel: nearest ? nearest.typeLabel : '좌표점'
+        title: nearest ? nearest.title : '중앙 십자선 지정 위치',
+        layerName: nearest ? nearest.layerName : '도면 중앙 좌표',
+        typeLabel: nearest ? nearest.typeLabel : '십자선 좌표점'
       };
 
       this.selectedPoint = selection;

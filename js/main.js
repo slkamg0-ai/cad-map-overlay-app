@@ -138,13 +138,34 @@ class CadMapOverlayApp {
     });
 
     const btnMeasure = document.getElementById('btn-cad-measure');
+    const btnAddMeasurePt = document.getElementById('btn-cad-add-measure-pt');
     btnMeasure.addEventListener('click', () => {
       const active = this.cadView.toggleMeasureMode();
       btnMeasure.classList.toggle('bg-amber-500', active);
       btnMeasure.classList.toggle('text-slate-950', active);
       btnMeasure.classList.toggle('bg-slate-800/90', !active);
       btnMeasure.classList.toggle('text-slate-200', !active);
-      this.showToast(active ? '📏 거리 측정 모드: 도면 위 두 지점을 클릭하세요.' : '거리 측정 모드를 종료했습니다.');
+      if (btnAddMeasurePt) btnAddMeasurePt.classList.toggle('hidden', !active);
+      this.showToast(active ? '📏 치수 측정 모드: 중앙 십자선을 맞춰 [측정점 찍기]를 누르거나 도면을 클릭하세요.' : '치수 측정 모드를 종료했습니다.');
+    });
+
+    btnAddMeasurePt?.addEventListener('click', () => {
+      this.cadView.addMeasurePointAtCenter();
+    });
+
+    // Center Crosshair Direct Actions in CAD View
+    document.getElementById('btn-cad-lock-center')?.addEventListener('click', () => {
+      const sel = this.cadView.getCenterSelection();
+      this.handleSelection(sel);
+      this.showToast(`📌 중앙 십자선 위치 선택됨: ${sel.title}`);
+    });
+
+    document.getElementById('btn-cad-center-to-map')?.addEventListener('click', () => {
+      const sel = this.cadView.getCenterSelection();
+      this.handleSelection(sel);
+      this.setViewMode('map', false);
+      this.mapView.focusSelection(this.currentSelection, true);
+      this.showToast(`🛰️ 중앙 십자선 위치 지도 띄우기: [${this.currentSelection.title}] 설치 위치를 표시합니다.`);
     });
 
     // 5. Opacity & Base Map & High Contrast
@@ -473,7 +494,7 @@ class CadMapOverlayApp {
   updateLiveCadHud(x, y, snapTitle) {
     const coordEl = document.getElementById('cad-live-coords');
     const geoEl = document.getElementById('cad-live-geo');
-    const snapEl = document.getElementById('cad-live-snap');
+    const srcBadge = document.getElementById('cad-coord-source-badge');
     if (coordEl) {
       coordEl.textContent = `X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`;
     }
@@ -485,12 +506,13 @@ class CadMapOverlayApp {
         geoEl.textContent = '-';
       }
     }
-    if (snapEl) {
+    if (srcBadge) {
       if (snapTitle) {
-        snapEl.textContent = `🎯 스냅: ${snapTitle}`;
-        snapEl.classList.remove('hidden');
+        srcBadge.textContent = `🎯 십자선 스냅`;
+        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold text-[10px]';
       } else {
-        snapEl.classList.add('hidden');
+        srcBadge.textContent = `화면 중앙 십자선`;
+        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]';
       }
     }
   }

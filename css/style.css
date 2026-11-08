@@ -161,6 +161,54 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.6);
 }
 
+/* Fixed Center Crosshair in CAD View */
+.cad-center-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 810;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cad-center-crosshair svg {
+  width: 64px;
+  height: 64px;
+  stroke: rgba(226, 232, 240, 0.85);
+  stroke-width: 1.7;
+  fill: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+  transition: stroke 0.15s ease, transform 0.15s ease;
+}
+
+.cad-center-crosshair.is-snapped svg {
+  stroke: #22d3ee;
+  stroke-width: 2.3;
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.75));
+}
+
+.cad-crosshair-tag {
+  position: absolute;
+  top: 66px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 47, 73, 0.95);
+  color: #67e8f9;
+  border: 1px solid #22d3ee;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
