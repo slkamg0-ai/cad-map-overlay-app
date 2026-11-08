@@ -17,6 +17,7 @@ export class MapView {
     this.tileLayers = {};
     this.currentTileKey = 'vworld_sat';
     this.hybridLayer = null;
+    this._rafMove = null;
 
     this.cadGroup = null;
     this.entityLayerMap = new Map(); // entity.id -> leafletLayer
@@ -39,39 +40,49 @@ export class MapView {
       zoom: 19,
       maxZoom: 22,
       preferCanvas: true,
+      fadeAnimation: false,
       zoomControl: false,
       attributionControl: false
     });
 
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
+    const fastTileOpts = {
+      minZoom: 6,
+      maxZoom: 22,
+      maxNativeZoom: 19,
+      updateWhenIdle: true,
+      updateWhenZooming: false,
+      keepBuffer: 0
+    };
+
+    // High-speed HTTP/2 4-subdomain Satellite + Korean Road Labels (single layer = 50% fewer tiles, no VWorld rate-limit on large PC monitors)
     this.tileLayers['vworld_sat'] = L.tileLayer(
-      'https://xdworld.vworld.kr/2d/Satellite/service/{z}/{x}/{y}.jpeg',
-      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19, updateWhenIdle: false, keepBuffer: 2 }
+      'https://{s}.google.com/vt/lyrs=y&hl=ko&x={x}&y={y}&z={z}',
+      { ...fastTileOpts, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], maxNativeZoom: 20 }
     );
 
     this.hybridLayer = L.tileLayer(
       'https://xdworld.vworld.kr/2d/Hybrid/service/{z}/{x}/{y}.png',
-      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19, zIndex: 10, updateWhenIdle: true, keepBuffer: 1 }
+      { ...fastTileOpts, zIndex: 10 }
     );
 
     this.tileLayers['vworld_base'] = L.tileLayer(
-      'https://xdworld.vworld.kr/2d/Base/service/{z}/{x}/{y}.png',
-      { minZoom: 6, maxZoom: 19, maxNativeZoom: 19 }
+      'https://{s}.google.com/vt/lyrs=m&hl=ko&x={x}&y={y}&z={z}',
+      { ...fastTileOpts, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], maxNativeZoom: 20 }
     );
 
     this.tileLayers['esri_sat'] = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 22, maxNativeZoom: 19 }
+      fastTileOpts
     );
 
     this.tileLayers['osm'] = L.tileLayer(
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      { maxZoom: 22, maxNativeZoom: 19 }
+      fastTileOpts
     );
 
     this.tileLayers['vworld_sat'].addTo(this.map);
-    this.hybridLayer.addTo(this.map);
 
     this.cadGroup = L.featureGroup().addTo(this.map);
 
@@ -95,14 +106,17 @@ export class MapView {
       }
     });
 
-    // Real-time cursor & map center coordinate tracking
+    // Throttled real-time cursor & map center coordinate tracking (prevents PC high-Hz mousemove lag)
     this.map.on('mousemove', (e) => {
-      if (this.onHoverCoords) {
-        this.onHoverCoords(e.latlng.lat, e.latlng.lng);
-      }
+      if (!this.onHoverCoords || this._rafMove) return;
+      const { lat, lng } = e.latlng;
+      this._rafMove = requestAnimationFrame(() => {
+        this._rafMove = null;
+        this.onHoverCoords(lat, lng);
+      });
     });
 
-    this.map.on('move', () => {
+    this.map.on('moveend', () => {
       if (this.onHoverCoords) {
         const c = this.map.getCenter();
         this.onHoverCoords(c.lat, c.lng);
@@ -118,7 +132,7 @@ export class MapView {
     this.tileLayers[key].addTo(this.map);
     this.currentTileKey = key;
 
-    if (key === 'vworld_sat' || key === 'esri_sat') {
+    if (key === 'esri_sat') {
       if (!this.map.hasLayer(this.hybridLayer)) this.hybridLayer.addTo(this.map);
     } else {
       if (this.map.hasLayer(this.hybridLayer)) this.map.removeLayer(this.hybridLayer);
@@ -126,6 +140,14 @@ export class MapView {
   }
 
   setHybridVisible(visible) {
+    if (this.currentTileKey === 'vworld_sat') {
+      this.tileLayers['vworld_sat'].setUrl(
+        visible
+          ? 'https://{s}.google.com/vt/lyrs=y&hl=ko&x={x}&y={y}&z={z}'
+          : 'https://{s}.google.com/vt/lyrs=s&hl=ko&x={x}&y={y}&z={z}'
+      );
+      return;
+    }
     if (visible) {
       if (!this.map.hasLayer(this.hybridLayer)) this.hybridLayer.addTo(this.map);
     } else {

@@ -16,16 +16,16 @@
   <link rel="manifest" href="./manifest.json">
 
   <!-- Preconnect to Map Tile & CDN Servers for Faster Initial Load -->
-  <link rel="preconnect" href="https://xdworld.vworld.kr" crossorigin>
-  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://mt0.google.com" crossorigin>
+  <link rel="preconnect" href="https://mt1.google.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Precompiled Utility CSS (Zero Runtime JS Overhead) -->
+  <link rel="stylesheet" href="./css/tailwind-lite.css">
 
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet CSS & JS (via Fast Cloudflare Seoul Edge CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
   <!-- Proj4js for Korean CRS Transformations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>

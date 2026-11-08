@@ -27,11 +27,9 @@ body {
   scrollbar-width: none;
 }
 
-/* Glassmorphism Panels */
+/* High-Performance Dark Panels (no heavy full-screen GPU backdrop-filter lag on PC) */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(15, 23, 42, 0.96);
 }
 
 /* Active Mode Tab */

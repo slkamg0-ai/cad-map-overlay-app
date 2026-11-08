@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cad-map-overlay-v4';
+const CACHE_NAME = 'cad-map-overlay-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './css/tailwind-lite.css',
   './css/style.css',
   './js/main.js',
   './js/mapView.js',
@@ -36,17 +37,11 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Do NOT intercept external map tile servers (let browser fetch tiles directly in parallel)
-  if (
-    url.hostname.includes('vworld.kr') ||
-    url.hostname.includes('arcgisonline.com') ||
-    url.hostname.includes('openstreetmap.org')
-  ) {
+  // Only handle same-origin app assets; let browser handle all external map tiles & CDNs directly
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  // Stale-While-Revalidate for same-origin app files & CDN scripts:
-  // Serve immediately from cache if available, update cache in background
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)

@@ -589,7 +589,7 @@ class CadMapOverlayApp {
     if (geoEl) {
       geoEl.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     }
-    if (srcBadge) {
+    if (srcBadge && srcBadge.textContent !== '지도 좌표') {
       srcBadge.textContent = '지도 좌표';
       srcBadge.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px] whitespace-nowrap shrink-0';
     }
@@ -613,12 +613,12 @@ class CadMapOverlayApp {
       }
     }
     if (srcBadge) {
-      if (snapTitle) {
-        srcBadge.textContent = '🎯 스냅됨';
-        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold text-[10px] whitespace-nowrap shrink-0';
-      } else {
-        srcBadge.textContent = '십자선 CAD';
-        srcBadge.className = 'px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0';
+      const nextText = snapTitle ? '🎯 스냅됨' : '십자선 CAD';
+      if (srcBadge.textContent !== nextText) {
+        srcBadge.textContent = nextText;
+        srcBadge.className = snapTitle
+          ? 'px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-extrabold text-[10px] whitespace-nowrap shrink-0'
+          : 'px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px] whitespace-nowrap shrink-0';
       }
     }
   }
