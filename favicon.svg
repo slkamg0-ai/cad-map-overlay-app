@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1528"/>
+      <stop offset="55%" stop-color="#0f2547"/>
+      <stop offset="100%" stop-color="#081020"/>
+    </linearGradient>
+    <linearGradient id="cadCyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="pinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded App Icon Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="14" y="14" width="484" height="484" rx="98" fill="none" stroke="#1e3a5f" stroke-width="6"/>
+
+  <!-- Blueprint Grid Lines -->
+  <g stroke="#38bdf8" stroke-opacity="0.16" stroke-width="3">
+    <line x1="104" y1="36" x2="104" y2="476"/>
+    <line x1="180" y1="36" x2="180" y2="476"/>
+    <line x1="256" y1="36" x2="256" y2="476"/>
+    <line x1="332" y1="36" x2="332" y2="476"/>
+    <line x1="408" y1="36" x2="408" y2="476"/>
+    <line x1="36" y1="104" x2="476" y2="104"/>
+    <line x1="36" y1="180" x2="476" y2="180"/>
+    <line x1="36" y1="256" x2="476" y2="256"/>
+    <line x1="36" y1="332" x2="476" y2="332"/>
+    <line x1="36" y1="408" x2="476" y2="408"/>
+  </g>
+
+  <!-- Map Parcel / Building CAD Footprint -->
+  <polygon points="96,356 176,136 392,136 420,356" fill="#0ea5e9" fill-opacity="0.12" stroke="url(#cadCyan)" stroke-width="10" stroke-linejoin="round"/>
+  <polyline points="96,264 256,264 316,356" fill="none" stroke="#4ade80" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- CAD Vertex Nodes -->
+  <rect x="164" y="124" width="24" height="24" rx="4" fill="#0b1528" stroke="#22d3ee" stroke-width="6"/>
+  <rect x="380" y="124" width="24" height="24" rx="4" fill="#0b1528" stroke="#22d3ee" stroke-width="6"/>
+  <rect x="84" y="344" width="24" height="24" rx="4" fill="#0b1528" stroke="#22d3ee" stroke-width="6"/>
+  <rect x="408" y="344" width="24" height="24" rx="4" fill="#0b1528" stroke="#22d3ee" stroke-width="6"/>
+
+  <!-- Center CAD Crosshair Reticle -->
+  <circle cx="256" cy="264" r="68" fill="#0b1528" fill-opacity="0.65" stroke="#22d3ee" stroke-width="10"/>
+  <circle cx="256" cy="264" r="32" fill="none" stroke="#38bdf8" stroke-width="5" stroke-dasharray="10 8"/>
+  <line x1="256" y1="168" x2="256" y2="216" stroke="#22d3ee" stroke-width="10" stroke-linecap="round"/>
+  <line x1="256" y1="312" x2="256" y2="360" stroke="#22d3ee" stroke-width="10" stroke-linecap="round"/>
+  <line x1="160" y1="264" x2="208" y2="264" stroke="#22d3ee" stroke-width="10" stroke-linecap="round"/>
+  <line x1="304" y1="264" x2="352" y2="264" stroke="#22d3ee" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Map Location Pin over Crosshair Center -->
+  <path d="M256 106 C206 106 168 144 168 194 C168 256 256 336 256 336 C256 336 344 256 344 194 C344 144 306 106 256 106 Z" fill="url(#pinGrad)" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+  <circle cx="256" cy="192" r="34" fill="#0b1528" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="256" cy="192" r="12" fill="#22d3ee"/>
+
+  <!-- Bottom "CAD" Badge -->
+  <rect x="148" y="392" width="216" height="58" rx="29" fill="#0f172a" stroke="#38bdf8" stroke-width="6"/>
+  <text x="256" y="431" text-anchor="middle" fill="#f8fafc" font-family="Arial, sans-serif" font-weight="900" font-size="34" letter-spacing="3">CAD·MAP</text>
+</svg>

@@ -1,0 +1,31 @@
+{
+  "name": "CAD-지도 양방향 위치 확인 & 설비 인스펙터",
+  "short_name": "CAD↔지도",
+  "description": "지도 위 캐드(.dxf/.dwg) 도면 오버레이 및 중앙 십자선 도면·지도 양방향 설치 위치 확인 웹앱",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

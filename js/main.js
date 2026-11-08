@@ -22,10 +22,12 @@ class CadMapOverlayApp {
     this.calibPickStep = null; // 1 | 2 when picking map coordinates for 2-point calibration
     this.gpsWatchId = null;
     this.simLocationMode = false;
+    this.deferredInstallPrompt = null;
 
     this.initViews();
     this.populateCrsSelect();
     this.bindUiEvents();
+    this.initPwaInstall();
 
     // Load rich sample CAD drawing on startup
     setTimeout(() => {
@@ -313,6 +315,51 @@ class CadMapOverlayApp {
       } else {
         this.showToast('모의 내위치 모드를 해제했습니다.');
       }
+    });
+  }
+
+  /**
+   * Register Service Worker & Handle App Shortcut (PWA) Installation
+   */
+  initPwaInstall() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    const installModal = document.getElementById('install-guide-modal');
+    const nativeBtn = document.getElementById('btn-trigger-native-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      if (nativeBtn) nativeBtn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      this.deferredInstallPrompt = null;
+      if (nativeBtn) nativeBtn.classList.add('hidden');
+      if (installModal) installModal.classList.add('hidden');
+      this.showToast('✅ 홈 화면에 CAD↔지도 바로가기 아이콘이 설치되었습니다!');
+    });
+
+    const triggerInstall = async () => {
+      if (this.deferredInstallPrompt) {
+        this.deferredInstallPrompt.prompt();
+        const choice = await this.deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          this.deferredInstallPrompt = null;
+          if (nativeBtn) nativeBtn.classList.add('hidden');
+          if (installModal) installModal.classList.add('hidden');
+        }
+      } else if (installModal) {
+        installModal.classList.remove('hidden');
+      }
+    };
+
+    document.getElementById('btn-install-pwa')?.addEventListener('click', triggerInstall);
+    nativeBtn?.addEventListener('click', triggerInstall);
+    document.getElementById('btn-close-install-modal')?.addEventListener('click', () => {
+      installModal?.classList.add('hidden');
     });
   }
 
